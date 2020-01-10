@@ -1,0 +1,7 @@
+#
+# version_info - version information for the netlabel tool components
+#
+
+# version components
+VERSION_MAJOR=0
+VERSION_MINOR=20
