@@ -1,0 +1,26 @@
+commit 8295000fd7d146d2a1eeb75ab2d8fe0c598b8e99
+Author: Paul Moore <pmoore@redhat.com>
+Date:   Wed Jan 15 10:00:27 2014 -0500
+
+    libnetlabel: increase the default message size of 8k
+    
+    In some cases, e.g. a CIPSO DOI definition with a large number of
+    translations, the message would be too large to fit in the default
+    message buffer.  This patch fixes this by increasing the default
+    message size to 8kb.
+    
+    Signed-off-by: Paul Moore <pmoore@redhat.com>
+
+diff --git a/libnetlabel/netlabel_init.c b/libnetlabel/netlabel_init.c
+index 79ba80e..ad2b7f6 100644
+--- a/libnetlabel/netlabel_init.c
++++ b/libnetlabel/netlabel_init.c
+@@ -46,6 +46,8 @@ int nlbl_init(void)
+ {
+ 	int ret_val;
+ 
++	nlmsg_set_default_size(8096);
++
+ 	ret_val = nlbl_mgmt_init();
+ 	if (ret_val < 0)
+ 		return ret_val;

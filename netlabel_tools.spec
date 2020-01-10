@@ -1,7 +1,7 @@
 Summary: Tools to manage the Linux NetLabel subsystem
 Name: netlabel_tools
 Version: 0.20
-Release: 1%{?dist}
+Release: 5%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://netlabel.sf.net/
@@ -17,6 +17,8 @@ BuildRequires: doxygen
 BuildRequires: systemd
 
 Patch01: netlabelctl-addr_parse_fix.patch
+Patch02: libnetlabel-nla_put_nested_fix.patch
+Patch03: libnetlabel-message_size.patch
 
 %description
 NetLabel is a kernel subsystem which implements explicit packet labeling
@@ -29,10 +31,12 @@ kernel subsystem.
 %setup -q
 
 %patch01 -p1
+%patch02 -p1
+%patch03 -p1
 
 %build
 ./configure --prefix="%{_prefix}" --libdir="%{_libdir}" --enable-systemd
-make V=1 %{?_smp_mflags}
+CFLAGS="%{optflags}" make V=1 %{?_smp_mflags}
 
 %install
 rm -rf "%{buildroot}"
@@ -61,6 +65,19 @@ make V=1 DESTDIR="%{buildroot}" install
 %attr(0644,root,root) %config(noreplace) /etc/netlabel.rules
 
 %changelog
+* Thu Feb 27 2014 Paul Moore <pmoore@redhat.com> - 0.20-5
+- Build with CFLAGS="${optflags}" (RHBZ #1070780)
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 0.20-4
+- Mass rebuild 2014-01-24
+
+* Wed Jan 15 2014 Paul Moore <pmoore@redhat.com> - 0.20-3
+- Fix a problem when adding a CIPSO DOI with a large number of translations
+- Remove old patches
+  Resolves: #1053687
+
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 0.20-2
+- Mass rebuild 2013-12-27
+
 * Fri Oct 25 2013 Paul Moore <pmoore@redhat.com> - 0.20-1
 - Add input validation on network address masks (#1003909)
 
