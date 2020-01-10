@@ -1,7 +1,7 @@
 Summary: Tools to manage the Linux NetLabel subsystem
 Name: netlabel_tools
 Version: 0.19
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://netlabel.sf.net/
@@ -10,6 +10,7 @@ Source1: netlabel
 Source2: netlabel.rules
 Patch1: netlabel_tools-0.17-new-hdrs.patch
 Patch2: netlabel_tools-0.19-return_codes.patch
+Patch3: netlabel_tools-0.19-mask_check.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}
 BuildRequires: kernel-headers >= 2.6.18
 BuildRequires: libnl-devel
@@ -30,6 +31,7 @@ configure the kernel subsystem.
 # Build fixes.
 %patch1 -p1 -b .new-hdrs
 %patch2 -p1 -b .rc
+%patch3 -p1 -b .mask
 
 %build
 # Don't use _smp_mflags, it's small and a hand crafted Makefile
@@ -65,6 +67,10 @@ rm -rf $RPM_BUILD_ROOT
 %attr(0644,root,root) %{_mandir}/man8/*
 
 %changelog
+* Thu Jan 20 2011 Peter Vrabec <pvrabec@redhat.com> - 0.19-7
+- fix return code when network mask is invalid
+  Resolves: #602291
+
 * Wed Jun 16 2010 Peter Vrabec <pvrabec@redhat.com> - 0.19-6
 - make initscript LSB compliant
 - show version of netlabelctl and libnetlabel in help

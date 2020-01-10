@@ -1,0 +1,21 @@
+diff -up netlabel_tools-0.19/netlabelctl/main.c.mask netlabel_tools-0.19/netlabelctl/main.c
+--- netlabel_tools-0.19/netlabelctl/main.c.mask	2011-01-20 13:57:01.930600461 +0100
++++ netlabel_tools-0.19/netlabelctl/main.c	2011-01-20 14:05:02.269251557 +0100
+@@ -244,6 +244,8 @@ int nlctl_addr_parse(char *addr_str, str
+ 	if (ret_val > 0) {
+ 		addr->type = AF_INET;
+ 		iter_a = (mask ? atoi(mask) : 32);
++		if(iter_a > 32)
++			return -EINVAL;
+ 		for (; iter_a > 0; iter_a--) {
+ 			addr->mask.v4.s_addr >>= 1;
+ 			addr->mask.v4.s_addr |= 0x80000000;
+@@ -257,6 +259,8 @@ int nlctl_addr_parse(char *addr_str, str
+ 	if (ret_val > 0) {
+ 		addr->type = AF_INET6;
+ 		iter_a = (mask ? atoi(mask) : 128);
++		if(iter_a > 128)
++			return -EINVAL;
+ 		for (iter_b = 0; iter_a > 0 && iter_b < 4; iter_b++) {
+ 			for (; iter_a > 0 &&
+ 			       addr->mask.v6.s6_addr32[iter_b] < 0xffffffff;
