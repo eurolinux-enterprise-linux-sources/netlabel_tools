@@ -1,7 +1,7 @@
 Summary: Tools to manage the Linux NetLabel subsystem
 Name: netlabel_tools
 Version: 0.19
-Release: 7%{?dist}
+Release: 11%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://netlabel.sf.net/
@@ -11,6 +11,9 @@ Source2: netlabel.rules
 Patch1: netlabel_tools-0.17-new-hdrs.patch
 Patch2: netlabel_tools-0.19-return_codes.patch
 Patch3: netlabel_tools-0.19-mask_check.patch
+Patch4: netlabel_tools-0.19-multi_part_msg.patch
+Patch5: netlabel_tools-0.19-nla_put_nested_fix.patch
+Patch6: netlabel_tools-0.19-message_size.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}
 BuildRequires: kernel-headers >= 2.6.18
 BuildRequires: libnl-devel
@@ -32,6 +35,9 @@ configure the kernel subsystem.
 %patch1 -p1 -b .new-hdrs
 %patch2 -p1 -b .rc
 %patch3 -p1 -b .mask
+%patch4 -p1 -b .msg-multi
+%patch5 -p1 -b .nla-nest
+%patch6 -p1 -b .msg-size
 
 %build
 # Don't use _smp_mflags, it's small and a hand crafted Makefile
@@ -61,12 +67,28 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 %doc docs/*.txt
+%doc LICENSE
 %attr(0755,root,root) /sbin/*
 %attr(0755,root,root) /etc/rc.d/init.d/netlabel
 %config(noreplace) %attr(640,root,root) /etc/netlabel.rules
 %attr(0644,root,root) %{_mandir}/man8/*
 
 %changelog
+* Fri May 16 2014 Paul Moore <pmoore@redhat.com> - 0.19-11
+- Force a rebuild for RHEL6.6 fasttrack
+
+* Thu May 15 2014 Paul Moore <pmoore@redhat.com> - 0.19-10
+- Add the LICENSE file as an installed %doc file
+  Resolves:#1098082
+
+* Mon Mar 17 2014 Paul Moore <pmoore@redhat.com> - 0.19-9
+- Fix a problem with multi-part netlink messages
+  Resolves: #918763
+
+* Wed Jan 15 2014 Paul Moore <pmoore@redhat.com> - 0.19-8
+- Fix a problem when adding a CIPSO DOI with a large number of translations
+  Resolves: #1000177
+
 * Thu Jan 20 2011 Peter Vrabec <pvrabec@redhat.com> - 0.19-7
 - fix return code when network mask is invalid
   Resolves: #602291

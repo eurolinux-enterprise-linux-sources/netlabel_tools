@@ -1,0 +1,79 @@
+commit c7490b8b5f25318c42a0c1e70ff47a183b4bff21
+Author: Paul Moore <paul@paul-moore.com>
+Date:   Wed Mar 6 22:03:20 2013 +0000
+
+    Correctly read all the parts of multi-part messages
+
+diff --git a/libnetlabel/mod_cipsov4.c b/libnetlabel/mod_cipsov4.c
+index 220fe7f..68ff97c 100644
+--- a/libnetlabel/mod_cipsov4.c
++++ b/libnetlabel/mod_cipsov4.c
+@@ -940,7 +940,7 @@ int nlbl_cipsov4_listall(struct nlbl_handle *hndl,
+ 			/* next message */
+ 			nl_hdr = nlmsg_next(nl_hdr, &data_len);
+ 		}
+-	} while (data > 0 && nl_hdr->nlmsg_type != NLMSG_DONE);
++	} while (NL_MULTI_CONTINUE(nl_hdr));
+ 
+ 	*dois = doi_a;
+ 	*mtypes = mtype_a;
+diff --git a/libnetlabel/mod_mgmt.c b/libnetlabel/mod_mgmt.c
+index a85244d..9e0d8ce 100644
+--- a/libnetlabel/mod_mgmt.c
++++ b/libnetlabel/mod_mgmt.c
+@@ -443,7 +443,7 @@ int nlbl_mgmt_protocols(struct nlbl_handle *hndl, nlbl_proto **protocols)
+ 			/* next message */
+ 			nl_hdr = nlmsg_next(nl_hdr, &data_len);
+ 		}
+-	} while (data_len > 0 && nl_hdr->nlmsg_type != NLMSG_DONE);
++	} while (NL_MULTI_CONTINUE(nl_hdr));
+ 
+ 	*protocols = protos;
+ 	ret_val = protos_count;
+@@ -1138,7 +1138,7 @@ int nlbl_mgmt_listall(struct nlbl_handle *hndl, struct nlbl_dommap **domains)
+ 			/* next message */
+ 			nl_hdr = nlmsg_next(nl_hdr, &data_len);
+ 		}
+-	} while (data_len > 0 && nl_hdr->nlmsg_type != NLMSG_DONE);
++	} while (NL_MULTI_CONTINUE(nl_hdr));
+ 
+ 	*domains = dmns;
+ 	ret_val = dmns_count;
+diff --git a/libnetlabel/mod_unlabeled.c b/libnetlabel/mod_unlabeled.c
+index 5c83031..c91e996 100644
+--- a/libnetlabel/mod_unlabeled.c
++++ b/libnetlabel/mod_unlabeled.c
+@@ -965,7 +965,7 @@ int nlbl_unlbl_staticlist(struct nlbl_handle *hndl,
+ 			/* next message */
+ 			nl_hdr = nlmsg_next(nl_hdr, &data_len);
+ 		}
+-	} while (data_len > 0 && nl_hdr->nlmsg_type != NLMSG_DONE);
++	} while (NL_MULTI_CONTINUE(nl_hdr));
+ 
+ 	*addrs = addr_array;
+ 	ret_val = addr_count;
+@@ -1149,7 +1149,7 @@ int nlbl_unlbl_staticlistdef(struct nlbl_handle *hndl,
+ 			/* next message */
+ 			nl_hdr = nlmsg_next(nl_hdr, &data_len);
+ 		}
+-	} while (data_len > 0 && nl_hdr->nlmsg_type != NLMSG_DONE);
++	} while (NL_MULTI_CONTINUE(nl_hdr));
+ 
+ 	*addrs = addr_array;
+ 	ret_val = addr_count;
+diff --git a/libnetlabel/netlabel_internal.h b/libnetlabel/netlabel_internal.h
+index b07c196..694d0db 100644
+--- a/libnetlabel/netlabel_internal.h
++++ b/libnetlabel/netlabel_internal.h
+@@ -32,6 +32,11 @@ struct nlbl_handle {
+ 	struct nl_handle *nl_hndl;
+ };
+ 
++#define NL_MULTI_CONTINUE(hdr) \
++	(((hdr)->nlmsg_type == 0) || \
++	 (((hdr)->nlmsg_flags & NLM_F_MULTI) && \
++	  ((hdr)->nlmsg_type != NLMSG_DONE)))
++
+ /* Specify which version of libnl we are using */
+ /*  1.0-pre5 => 1005 */
+ /*  1.0-pre6 => 1006 */
